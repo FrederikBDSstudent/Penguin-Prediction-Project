@@ -28,7 +28,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Prediction Script
-        run: python CatchPenguin.py
+        run: python Auto_Penguin_Prediction.py
 
       - name: Commit and Push JSON Prediction
         env:
