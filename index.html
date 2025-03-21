@@ -1,136 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penguin Daily - Breaking News</title>
-    <style>
-        body {
-            font-family: 'Georgia', serif;
-            background-color: #f5f5f5;
-            color: #333;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
+<script>
+    function getDiscoveryNarrative() {
+        const methods = [
+            "was spotted waddling confidently through",
+            "was rescued from a fountain in",
+            "was seen hitching a ride on a food cart near",
+            "was found confused but calm on a subway platform at",
+            "was escorted by NYPD after being found wandering around",
+            "was discovered peeking into windows near",
+            "was seen enjoying the breeze atop a tour bus near",
+            "was caught sliding down handrails in",
+            "was spotted trying to join a group of pigeons at",
+            "was quietly sitting near a pretzel stand by"
+        ];
+
+        const places = [
+            "Central Park",
+            "Times Square",
+            "Wall Street",
+            "Coney Island",
+            "Union Square",
+            "The High Line",
+            "Brooklyn Bridge",
+            "The Bronx Zoo",
+            "Chelsea Market",
+            "Fifth Avenue"
+        ];
+
+        const daySeed = new Date().getDate();
+        const method = methods[daySeed % methods.length];
+        const place = places[daySeed % places.length];
+        return `Earlier today, a penguin ${method} ${place}, surprising locals and tourists alike.`;
+    }
+
+    function getSpeciesDescription(species) {
+        const descriptions = {
+            "Adelie": "Adélie penguins are energetic and bold. They inhabit the Antarctic coastline and are known for their classic tuxedo appearance and social nature. Despite their small size, they’re agile swimmers and excellent hunters. These little birds can travel vast distances on land and ice, often forming large colonies during breeding season.",
+            "Gentoo": "Gentoo penguins are the Formula 1 racers of the penguin world. Recognizable by the white stripe across their heads and bright orange beaks, they can swim up to 36 km/h. Gentoos are curious and clever, often seen building intricate nests with pebbles and sometimes stealing them from their neighbors.",
+            "Chinstrap": "Chinstrap penguins are vocal and expressive, named for the thin black line under their beak that looks like a helmet strap. Found on rugged islands in the Southern Ocean, they live in large colonies and are constantly chatting, squawking, and waddling around with attitude. Fierce and feathery, they’re born entertainers."
+        };
+        return descriptions[species] || "This penguin is truly one of a kind — mysterious, elegant, and unlike any we’ve seen before. Its species remains rare in these urban adventures.";
+    }
+
+    async function loadPrediction() {
+        try {
+            const response = await fetch('data/prediction_result.json');
+            const data = await response.json();
+            const discovery = getDiscoveryNarrative();
+            const speciesText = getSpeciesDescription(data.predicted_species);
+
+            // Round numbers to 2 decimal places
+            const billLength = parseFloat(data.bill_length_mm).toFixed(2);
+            const billDepth = parseFloat(data.bill_depth_mm).toFixed(2);
+            const flipperLength = parseFloat(data.flipper_length_mm).toFixed(2);
+
+            document.getElementById("prediction").innerHTML = `
+                <h1>Penguin Found in New York!</h1>
+                <div class="byline">Penguin Daily • ${new Date(data.timestamp).toLocaleDateString()}</div>
+                <div class="article">
+                    <p>${discovery}</p>
+                    <p>The bird was later identified as a ${data.predicted_species}, based on detailed measurements of its bill and flippers. Officials confirmed the following: a bill length of ${billLength}mm, a bill depth of ${billDepth}mm, and flipper length measuring ${flipperLength}mm.</p>
+                    <p>${speciesText}</p>
+                    <p>The penguin was safely relocated to a wildlife center for further observation. Authorities continue to investigate how these Antarctic guests keep appearing in the Big Apple.</p>
+                </div>
+                <div class="footer">Copyright © Penguin Daily</div>
+            `;
+        } catch (error) {
+            document.getElementById("prediction").innerHTML = "<p class='loading'>Failed to load prediction article.</p>";
         }
+    }
 
-        .container {
-            background: #fff;
-            padding: 40px;
-            max-width: 700px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 1px solid #ccc;
-        }
-
-        h1 {
-            font-size: 32px;
-            text-align: center;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-        }
-
-        .byline {
-            font-style: italic;
-            font-size: 14px;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #666;
-        }
-
-        .article p {
-            font-size: 18px;
-            line-height: 1.8;
-            margin-bottom: 20px;
-            text-align: justify;
-        }
-
-        .highlight {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .footer {
-            margin-top: 40px;
-            font-size: 14px;
-            text-align: center;
-            color: #999;
-        }
-    </style>
-    <script>
-        function getDiscoveryNarrative() {
-            const methods = [
-                "was spotted waddling confidently through",
-                "was rescued from a fountain in",
-                "was seen hitching a ride on a food cart near",
-                "was found confused but calm on a subway platform at",
-                "was escorted by NYPD after being found wandering around",
-                "was discovered peeking into windows near",
-                "was seen enjoying the breeze atop a tour bus near",
-                "was caught sliding down handrails in",
-                "was spotted trying to join a group of pigeons at",
-                "was quietly sitting near a pretzel stand by"
-            ];
-
-            const places = [
-                "Central Park",
-                "Times Square",
-                "Wall Street",
-                "Coney Island",
-                "Union Square",
-                "The High Line",
-                "Brooklyn Bridge",
-                "The Bronx Zoo",
-                "Chelsea Market",
-                "Fifth Avenue"
-            ];
-
-            const daySeed = new Date().getDate();
-            const method = methods[daySeed % methods.length];
-            const place = places[daySeed % places.length];
-            return `Earlier today, a penguin ${method} ${place}, surprising locals and tourists alike.`;
-        }
-
-        function getSpeciesDescription(species) {
-            const descriptions = {
-                "Adelie": "Adélie penguins are energetic and bold. They inhabit the Antarctic coastline and are known for their classic tuxedo appearance and social nature. Despite their small size, they’re agile swimmers and excellent hunters. These little birds can travel vast distances on land and ice, often forming large colonies during breeding season.",
-                "Gentoo": "Gentoo penguins are the Formula 1 racers of the penguin world. Recognizable by the white stripe across their heads and bright orange beaks, they can swim up to 36 km/h. Gentoos are curious and clever, often seen building intricate nests with pebbles and sometimes stealing them from their neighbors.",
-                "Chinstrap": "Chinstrap penguins are vocal and expressive, named for the thin black line under their beak that looks like a helmet strap. Found on rugged islands in the Southern Ocean, they live in large colonies and are constantly chatting, squawking, and waddling around with attitude. Fierce and feathery, they’re born entertainers."
-            };
-            return descriptions[species] || "This penguin is truly one of a kind — mysterious, elegant, and unlike any we’ve seen before. Its species remains rare in these urban adventures.";
-        }
-
-        async function loadPrediction() {
-            try {
-                const response = await fetch('data/prediction_result.json');
-                const data = await response.json();
-                const discovery = getDiscoveryNarrative();
-                const speciesText = getSpeciesDescription(data.predicted_species);
-
-                document.getElementById("prediction").innerHTML = `
-                    <h1>Penguin Found in New York!</h1>
-                    <div class="byline">Penguin Daily • ${new Date(data.timestamp).toLocaleDateString()}</div>
-                    <div class="article">
-                        <p>${discovery}</p>
-                        <p>The bird was later identified as a <span class="highlight">${data.predicted_species}</span>, based on detailed measurements of its bill and flippers. Officials confirmed the following: a bill length of <span class="highlight">${data.bill_length_mm}mm</span>, a bill depth of <span class="highlight">${data.bill_depth_mm}mm</span>, and flipper length measuring <span class="highlight">${data.flipper_length_mm}mm</span>.</p>
-                        <p>${speciesText}</p>
-                        <p>The penguin was safely relocated to a wildlife center for further observation. Authorities continue to investigate how these Antarctic guests keep appearing in the Big Apple.</p>
-                    </div>
-                    <div class="footer">Copyright © Penguin Daily</div>
-                `;
-            } catch (error) {
-                document.getElementById("prediction").innerHTML = "<p class='loading'>Failed to load prediction article.</p>";
-            }
-        }
-
-        window.onload = loadPrediction;
-    </script>
-</head>
-<body>
-    <div class="container">
-        <div id="prediction" class="loading">Loading article...</div>
-    </div>
-</body>
-</html>
+    window.onload = loadPrediction;
+</script>
