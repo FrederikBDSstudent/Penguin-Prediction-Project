@@ -3,37 +3,46 @@ import joblib
 import requests
 import datetime
 
-#Load our model
-clf = joblib.load("models/penguin_classifier.pkl")
-label_encoder = joblib.load("models/label_encoder.pkl")
+# Load the model and scaler
+model = joblib.load("models/wrapper_model.pkl")   # <- Your Wrapper method model
+scaler = joblib.load("models/scaler.pkl")         # <- Your fitted StandardScaler
 
-#API endpoint where we fetch data
+# (Optional) load label encoder if you used it
+# label_encoder = joblib.load("models/label_encoder.pkl")
+
+# API endpoint to get new penguin data
 url = "http://130.225.39.127:8000/new_penguin/"
 response = requests.get(url)
 data = response.json()
 
-#I expect the following features
+# Features (must match training order used in wrapper model)
 features = [[
     data["bill_length_mm"],
     data["bill_depth_mm"],
-    data["flipper_length_mm"],
-    data["body_mass_g"]
+    data["flipper_length_mm"]
 ]]
 
-#I use the model to predict species
-species_encoded = clf.predict(features)[0]
-species = label_encoder.inverse_transform([species_encoded])[0]
+# Scale the input
+scaled_features = scaler.transform(features)
 
-#Save the prediction as JSON so we can gather data over time
+# Predict
+predicted_class = model.predict(scaled_features)[0]
+
+# If you trained with a LabelEncoder (y = 0/1/2), decode it
+# predicted_species = label_encoder.inverse_transform([predicted_class])[0]
+# If you trained directly with species names, use as is:
+predicted_species = predicted_class
+
+# Save prediction
 prediction_result = {
     "timestamp": datetime.datetime.utcnow().isoformat(),
     "bill_length_mm": data["bill_length_mm"],
     "bill_depth_mm": data["bill_depth_mm"],
     "flipper_length_mm": data["flipper_length_mm"],
-    "body_mass_g": data["body_mass_g"],
-    "predicted_species": species
+    "predicted_species": predicted_species
 }
 
+# Save to file
 with open("data/prediction.json", "w") as f:
     json.dump(prediction_result, f, indent=4)
 
