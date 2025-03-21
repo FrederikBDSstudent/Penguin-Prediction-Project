@@ -1,3 +1,5 @@
-requests
-joblib
+pandas
+numpy
+seaborn
 scikit-learn
+joblib
