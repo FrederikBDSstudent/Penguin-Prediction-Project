@@ -3,48 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penguin Predictions</title>
+    <title>Penguin Times - Breaking Discovery</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #74ebd5, #acb6e5);
-            color: #333;
+            font-family: 'Georgia', serif;
+            background: #f4f1ec;
+            color: #2c2c2c;
             margin: 0;
-            padding: 0;
+            padding: 40px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
         }
 
-        .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 400px;
+        .newspaper {
+            background: #ffffff;
+            padding: 30px;
+            border: 1px solid #ccc;
+            max-width: 700px;
             width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        h2 {
-            margin-bottom: 10px;
-            color: #2c3e50;
+        h1 {
+            font-size: 32px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            width: 300px;
+            border: 2px solid #333;
         }
 
         .prediction-info {
             font-size: 18px;
             line-height: 1.6;
+            margin: 8px 0;
         }
 
         .highlight {
             font-weight: bold;
-            color: #3498db;
+            color: #1a3d7c;
+        }
+
+        .description {
+            font-style: italic;
+            margin-top: 15px;
+            margin-bottom: 25px;
         }
 
         .loading {
             font-style: italic;
-            color: #888;
+            color: #999;
         }
     </style>
     <script>
@@ -52,25 +68,46 @@
             try {
                 const response = await fetch('data/prediction.json');
                 const data = await response.json();
-                document.getElementById("prediction").innerHTML = `
-                    <h2>Penguin Prediction</h2>
+
+                let speciesDescription = "";
+                switch (data.predicted_species.toLowerCase()) {
+                    case "chinstrap":
+                        speciesDescription = "The Chinstrap penguin is known for the narrow black band under its head, making it look like it's wearing a helmet strap.";
+                        break;
+                    case "gentoo":
+                        speciesDescription = "Gentoo penguins are speedy swimmers with bright orange beaks and white patches above the eyes.";
+                        break;
+                    case "adelie":
+                        speciesDescription = "Adélie penguins are classic tuxedo birds with a bold attitude and a love for ice.";
+                        break;
+                    default:
+                        speciesDescription = "An interesting penguin species has been detected!";
+                }
+
+                document.getElementById("article").innerHTML = `
+                    <h1>Penguin Found Roaming Central Park</h1>
+                    <div class="image-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Chinstrap_Penguin_%28Pygoscelis_antarcticus%29.jpg" alt="Penguin">
+                    </div>
+                    <p class="description">A lone penguin was discovered in New York City, far from its chilly homeland. Wildlife experts were shocked as the bird waddled peacefully near a hot dog stand in Central Park.</p>
                     <p class="prediction-info"><span class="highlight">Timestamp:</span> ${data.timestamp}</p>
                     <p class="prediction-info"><span class="highlight">Bill Length:</span> ${data.bill_length_mm} mm</p>
                     <p class="prediction-info"><span class="highlight">Bill Depth:</span> ${data.bill_depth_mm} mm</p>
                     <p class="prediction-info"><span class="highlight">Flipper Length:</span> ${data.flipper_length_mm} mm</p>
                     <p class="prediction-info"><span class="highlight">Body Mass:</span> ${data.body_mass_g} g</p>
                     <p class="prediction-info"><span class="highlight">Predicted Species:</span> ${data.predicted_species}</p>
+                    <p class="description"><span class="highlight">About the Species:</span> ${speciesDescription}</p>
                 `;
             } catch (error) {
-                document.getElementById("prediction").innerHTML = "<p class='loading'>Failed to load prediction.</p>";
+                document.getElementById("article").innerHTML = "<p class='loading'>Failed to load penguin article.</p>";
             }
         }
         window.onload = loadPrediction;
     </script>
 </head>
 <body>
-    <div class="container">
-        <div id="prediction" class="loading">Loading prediction...</div>
+    <div class="newspaper">
+        <div id="article" class="loading">Loading penguin news...</div>
     </div>
 </body>
 </html>
