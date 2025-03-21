@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Penguin Daily - Breaking News</title>
   <style>
@@ -100,6 +100,23 @@
       return `On a ${currentWeather} day in New York, a penguin ${method} ${place} ${timeOfDay}, much to the amusement of passersby.`;
     }
 
+    function getPenguinName() {
+      const names = [
+        "Tux",
+        "Waddles",
+        "Pebble",
+        "Iceberg",
+        "Snowball",
+        "Captain Flap",
+        "Pingo",
+        "Feathers",
+        "Blizzard",
+        "Sir Slippy"
+      ];
+      const daySeed = new Date().getDate();
+      return names[daySeed % names.length];
+    }
+
     function getSpeciesDescription(species) {
       const descriptions = {
         "Adelie": "Adélie penguins are energetic and bold. They inhabit the Antarctic coastline and are known for their classic tuxedo appearance and social nature. Despite their small size, they’re agile swimmers and excellent hunters. These little birds can travel vast distances on land and ice, often forming large colonies during breeding season.",
@@ -111,10 +128,12 @@
 
     async function loadPrediction() {
       try {
-        const response = await fetch('data/prediction_result.json');
+        const response = await fetch('data/prediction.json');
         const data = await response.json();
+
         const discovery = getDiscoveryNarrative();
         const speciesText = getSpeciesDescription(data.predicted_species);
+        const penguinName = getPenguinName();
 
         // Round numbers to 2 decimal places
         const billLength = parseFloat(data.bill_length_mm || 0).toFixed(2);
@@ -128,7 +147,7 @@
             <p>${discovery}</p>
             <p>The bird was later identified as a ${data.predicted_species}, based on detailed measurements of its bill and flippers. Wildlife experts confirmed the following: a bill length of ${billLength}mm, a bill depth of ${billDepth}mm, and flipper length measuring ${flipperLength}mm.</p>
             <p>${speciesText}</p>
-            <p>Authorities continue to investigate how these Antarctic visitors keep appearing in the heart of the Big Apple. Locals, meanwhile, have affectionately named the penguin ‘Tux’ and are campaigning for it to become the city's unofficial mascot.</p>
+            <p>Authorities continue to investigate how these Antarctic visitors keep appearing in the heart of the Big Apple. Locals, meanwhile, have affectionately named the penguin "${penguinName}", and many are already petitioning for an official welcome parade.</p>
           </div>
           <div class="footer">Copyright © Penguin Daily</div>
         `;
