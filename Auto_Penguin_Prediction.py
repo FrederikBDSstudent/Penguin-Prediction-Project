@@ -4,8 +4,8 @@ import requests
 import datetime
 
 # Load the model and scaler
-model = joblib.load("models/wrapper_model.pkl")   # <- Your Wrapper method model
-scaler = joblib.load("models/scaler.pkl")         # <- Your fitted StandardScaler
+model = joblib.load("models/wrapper_model.pkl")
+scaler = joblib.load("models/scaler.pkl")
 
 # (Optional) load label encoder if you used it
 # label_encoder = joblib.load("models/label_encoder.pkl")
@@ -43,7 +43,7 @@ prediction_result = {
 }
 
 # Save to file
-with open("data/prediction.json", "w") as f:
+with open("data/prediction_result.json", "w") as f:
     json.dump(prediction_result, f, indent=4)
 
 print(f"Prediction saved: {prediction_result}")
