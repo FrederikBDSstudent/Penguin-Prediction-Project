@@ -66,7 +66,7 @@
     <script>
         async function loadPrediction() {
             try {
-                const response = await fetch('data/prediction.json');
+                const response = await fetch('data/prediction_result.json');
                 const data = await response.json();
 
                 let speciesDescription = "";
