@@ -1,49 +1,32 @@
-import json
-import joblib
-import requests
-import datetime
+name: Daily Penguin Prediction
 
-# Load the model and scaler
-model = joblib.load("models/wrapper_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
+on:
+  schedule:
+    - cron: '30 5 * * *'  # Runs at 05:30 UTC = 07:30 CEST
+  workflow_dispatch:      # Allows manual runs from GitHub
 
-# (Optional) load label encoder if you used it
-# label_encoder = joblib.load("models/label_encoder.pkl")
+jobs:
+  predict:
+    runs-on: ubuntu-latest
 
-# API endpoint to get new penguin data
-url = "http://130.225.39.127:8000/new_penguin/"
-response = requests.get(url)
-data = response.json()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-# Features (must match training order used in wrapper model)
-features = [[
-    data["bill_length_mm"],
-    data["bill_depth_mm"],
-    data["flipper_length_mm"]
-]]
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-# Scale the input
-scaled_features = scaler.transform(features)
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-# Predict
-predicted_class = model.predict(scaled_features)[0]
+      - name: Run prediction script
+        run: python Auto_Penguin_Prediction.py
 
-# If you trained with a LabelEncoder (y = 0/1/2), decode it
-# predicted_species = label_encoder.inverse_transform([predicted_class])[0]
-# If you trained directly with species names, use as is:
-predicted_species = predicted_class
-
-# Save prediction
-prediction_result = {
-    "timestamp": datetime.datetime.utcnow().isoformat(),
-    "bill_length_mm": data["bill_length_mm"],
-    "bill_depth_mm": data["bill_depth_mm"],
-    "flipper_length_mm": data["flipper_length_mm"],
-    "predicted_species": predicted_species
-}
-
-# Save to file
-with open("data/prediction_result.json", "w") as f:
-    json.dump(prediction_result, f, indent=4)
-
-print(f"Prediction saved: {prediction_result}")
+      - name: Commit and push prediction result
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "Daily penguin prediction at 07:30 (DK time)"
+          add: 'data/prediction_result.json'
+          default_author: github_actions
