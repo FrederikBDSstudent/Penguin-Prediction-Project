@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Check out Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full history so commits can be pushed correctly
 
       - name: Verify Files Exist (Debugging Step)
         run: ls -l
@@ -36,7 +38,9 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          # Add the three files that get updated by the script
+          # Stage updated files
           git add data/prediction_result.json data/prediction_historical_stats.json data/species_distribution.png
-          git commit -m "Automated update of prediction data" || echo "No changes to commit"
-          git push origin main
+          # Commit if there are any changes
+          git diff-index --quiet HEAD || git commit -m "Automated update of prediction data"
+          # Push changes to the main branch
+          git push origin HEAD:main
