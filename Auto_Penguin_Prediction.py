@@ -22,7 +22,7 @@ features = [[
     data["bill_length_mm"],
     data["bill_depth_mm"],
     data["flipper_length_mm"],
-    data["body_mass_g"]  # Include this fourth feature
+    data["body_mass_g"]
 ]]
 print(f"[🐧 LOG] Extracted features: {features}")
 
