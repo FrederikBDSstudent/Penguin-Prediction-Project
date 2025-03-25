@@ -8,7 +8,7 @@ import sys
 def log(msg):
     print(f"[🐧 LOG] {msg}")
 
-# --- Load model and scaler ---
+# --- Load model, scaler, and label encoder ---
 try:
     model = joblib.load("models/wrapper_model.pkl")
     log("Model loaded successfully.")
@@ -21,6 +21,13 @@ try:
     log("Scaler loaded successfully.")
 except Exception as e:
     log(f"Error loading scaler: {e}")
+    sys.exit(1)
+
+try:
+    label_encoder = joblib.load("models/label_encoder.pkl")
+    log("Label encoder loaded successfully.")
+except Exception as e:
+    log(f"Error loading label encoder: {e}")
     sys.exit(1)
 
 # --- Get new penguin data ---
@@ -41,7 +48,8 @@ try:
     bill_length = float(data["bill_length_mm"])
     bill_depth = float(data["bill_depth_mm"])
     flipper_length = float(data["flipper_length_mm"])
-    features = [[bill_length, bill_depth, flipper_length]]
+    body_mass = float(data["body_mass_g"])
+    features = [[bill_length, bill_depth, flipper_length, body_mass]]
     log(f"Extracted features: {features}")
 except (KeyError, TypeError, ValueError) as e:
     log(f"Invalid or missing input data: {e}")
@@ -58,7 +66,8 @@ except Exception as e:
 # --- Predict species ---
 try:
     predicted_class = model.predict(scaled_features)[0]
-    predicted_species = predicted_class  # Assuming it's already a string
+    # Use the label encoder to convert the numeric prediction back to the original species name.
+    predicted_species = label_encoder.inverse_transform([predicted_class])[0]
     log(f"Predicted species: {predicted_species}")
 except Exception as e:
     log(f"Error during prediction: {e}")
@@ -70,6 +79,7 @@ prediction_result = {
     "bill_length_mm": bill_length,
     "bill_depth_mm": bill_depth,
     "flipper_length_mm": flipper_length,
+    "body_mass_g": body_mass,
     "predicted_species": predicted_species
 }
 
@@ -78,7 +88,7 @@ try:
     os.makedirs("data", exist_ok=True)
     with open("data/prediction_result.json", "w") as f:
         json.dump(prediction_result, f, indent=4)
-    log(f"Prediction saved to data/prediction_result.json")
+    log("Prediction saved to data/prediction_result.json")
 except Exception as e:
     log(f"Error saving prediction: {e}")
     sys.exit(1)
