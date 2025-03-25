@@ -13,16 +13,21 @@ url = "http://130.225.39.127:8000/new_penguin/"
 response = requests.get(url)
 data = response.json()
 
-# Extract the features expected by the model (ensure all 4 features are provided)
+# Log the fetched data
+print(f"[🐧 LOG] Fetched penguin data: {data}")
+
+# Extract the features expected by the model (all 4 features)
 features = [[
     data["bill_length_mm"],
     data["bill_depth_mm"],
     data["flipper_length_mm"],
-    data["body_mass_g"]
+    data["body_mass_g"]  # Ensure this feature is included
 ]]
+print(f"[🐧 LOG] Extracted features: {features}")
 
 # Scale the features before making predictions
 scaled_features = scaler.transform(features)
+print(f"[🐧 LOG] Scaled features: {scaled_features}")
 
 # Use the model to predict species and decode the prediction
 species_encoded = clf.predict(scaled_features)[0]
