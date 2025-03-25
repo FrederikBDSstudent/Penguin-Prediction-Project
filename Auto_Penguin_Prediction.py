@@ -8,6 +8,7 @@ import matplotlib
 # For headless environments (like GitHub Actions), use a non-interactive backend
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Ensure the "data" folder exists
 os.makedirs("data", exist_ok=True)
@@ -39,7 +40,7 @@ selected_features = scaled_features[:, :3]
 species_encoded = clf.predict(selected_features)[0]
 species = label_encoder.inverse_transform([species_encoded])[0]
 
-# 6) Save the prediction result as JSON
+# 6) Build the prediction result dictionary
 prediction_result = {
     "timestamp": datetime.datetime.utcnow().isoformat(),
     "bill_length_mm": data["bill_length_mm"],
@@ -49,13 +50,27 @@ prediction_result = {
     "predicted_species": species
 }
 
+# 7) Save the latest prediction result as JSON (overwriting the old file)
 with open("data/prediction_result.json", "w") as f:
     json.dump(prediction_result, f, indent=4)
 
-# 7) Update statistics in prediction_historical_stats.json
-STATS_FILE = "data/prediction_historical_stats.json"
+# 8) Append the prediction result to a cumulative history file
+HISTORY_FILE = "data/prediction_history.json"
+if os.path.exists(HISTORY_FILE):
+    with open(HISTORY_FILE, "r") as f:
+        try:
+            history = json.load(f)
+        except json.decoder.JSONDecodeError:
+            history = []
+else:
+    history = []
 
-# Load existing stats if available; handle empty/invalid JSON gracefully
+history.append(prediction_result)
+with open(HISTORY_FILE, "w") as f:
+    json.dump(history, f, indent=4)
+
+# 9) Update statistics in prediction_historical_stats.json
+STATS_FILE = "data/prediction_historical_stats.json"
 if os.path.exists(STATS_FILE):
     with open(STATS_FILE, "r") as f:
         try:
@@ -65,21 +80,34 @@ if os.path.exists(STATS_FILE):
 else:
     stats = {}
 
-# Increment the count for the predicted species
 stats[species] = stats.get(species, 0) + 1
 
-# Save updated stats
 with open(STATS_FILE, "w") as f:
     json.dump(stats, f, indent=4)
 
-# 8) Generate and save a pie chart of species distribution
+# 10) Generate and save a pretty pie chart of species distribution
 labels = list(stats.keys())
 sizes = list(stats.values())
 
-plt.figure(figsize=(6, 6))
-plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-plt.title("Penguin Species Distribution")
-plt.axis('equal')  # Ensures the pie is drawn as a circle
+# Set a clean style with Seaborn
+sns.set_style("white")
+fig, ax = plt.subplots(figsize=(6, 6))
+# Choose a soft "Blues" palette to complement your news article layout
+colors = sns.color_palette("Blues", n_colors=len(labels))
+wedges, text_labels, autotexts = ax.pie(
+    sizes,
+    labels=labels,
+    autopct='%1.1f%%',
+    startangle=140,
+    colors=colors,
+    wedgeprops={"edgecolor": "white", "linewidth": 2},
+    textprops={"color": "#2c3e50", "fontsize": 10}
+)
 
-plt.savefig("data/species_distribution.png")
+ax.axis('equal')  # Ensure the pie is drawn as a circle
+plt.setp(autotexts, size=10, weight="bold", color="white")
+
+ax.set_title("Penguin Species Distribution", fontsize=14, fontweight="bold", color="#2c3e50")
+
+plt.savefig("data/species_distribution.png", bbox_inches='tight', dpi=300)
 plt.close()
