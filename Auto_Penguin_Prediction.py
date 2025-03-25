@@ -1,38 +1,41 @@
+import os
 import json
 import joblib
 import requests
 import datetime
+import matplotlib.pyplot as plt
 
-# Load the wrapper model, label encoder, and scaler
+# Ensure the "data" folder exists
+os.makedirs("data", exist_ok=True)
+
+# 1) Load the model, label encoder, and scaler
 clf = joblib.load("models/wrapper_model.pkl")
 label_encoder = joblib.load("models/label_encoder.pkl")
 scaler = joblib.load("models/scaler.pkl")
 
-# Fetch new penguin data
+# 2) Fetch new penguin data
 url = "http://130.225.39.127:8000/new_penguin/"
 response = requests.get(url)
 data = response.json()
 
-# Extract all 4 features
+# 3) Extract and scale all 4 features
 features = [[
     data["bill_length_mm"],
     data["bill_depth_mm"],
     data["flipper_length_mm"],
     data["body_mass_g"]
 ]]
-
-# Scale all 4 features (scaler was fitted on 4 features)
 scaled_features = scaler.transform(features)
 
-# Apply the same feature selection used during training (select only 3 features)
-# Here we assume RFE kept the first 3 features; adjust the slice if a different ordering was used.
+# 4) Apply the same feature selection used during training
+#    (Here we assume the first 3 features were kept by RFE)
 selected_features = scaled_features[:, :3]
 
-# Predict species using the wrapper model (which expects 3 features)
+# 5) Predict species using the wrapper model
 species_encoded = clf.predict(selected_features)[0]
 species = label_encoder.inverse_transform([species_encoded])[0]
 
-# Save the prediction result as JSON
+# 6) Save the prediction result as JSON
 prediction_result = {
     "timestamp": datetime.datetime.utcnow().isoformat(),
     "bill_length_mm": data["bill_length_mm"],
@@ -44,3 +47,32 @@ prediction_result = {
 
 with open("data/prediction_result.json", "w") as f:
     json.dump(prediction_result, f, indent=4)
+
+# 7) Update statistics in prediction_stats.json
+STATS_FILE = "data/prediction_stats.json"
+
+# Load existing stats if available
+if os.path.exists(STATS_FILE):
+    with open(STATS_FILE, "r") as f:
+        stats = json.load(f)
+else:
+    stats = {}
+
+# Increment the count for the predicted species
+stats[species] = stats.get(species, 0) + 1
+
+# Save updated stats
+with open(STATS_FILE, "w") as f:
+    json.dump(stats, f, indent=4)
+
+# 8) Generate and save a pie chart of species distribution
+labels = list(stats.keys())
+sizes = list(stats.values())
+
+plt.figure(figsize=(6, 6))
+plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+plt.title("Penguin Species Distribution")
+plt.axis('equal')  # Ensures the pie is drawn as a circle
+
+plt.savefig("data/species_distribution.png")
+plt.close()
