@@ -59,8 +59,37 @@
       color: #666;
       text-align: center;
     }
+
+    /* New section for historical data */
+    .history-section {
+      margin-top: 60px;
+      border-top: 1px solid #ccc;
+      padding-top: 40px;
+    }
+    .history-section h2 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      text-align: center;
+      text-transform: uppercase;
+      border-bottom: 1px solid #000;
+      padding-bottom: 10px;
+    }
+    .history-section p {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-align: justify;
+    }
+    .history-section img {
+      display: block;
+      margin: 20px auto;
+      max-width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
   </style>
+
   <script>
+    /* --- Existing code to generate a whimsical narrative --- */
     function getDiscoveryNarrative() {
       const methods = [
         "was spotted casually strolling through",
@@ -126,6 +155,7 @@
       return descriptions[species] || "This penguin is truly one of a kind — mysterious, elegant, and unlike any we’ve seen before. Its species remains rare in these urban adventures.";
     }
 
+    /* --- Fetch and display the latest prediction article --- */
     async function loadPrediction() {
       try {
         const response = await fetch('data/prediction_result.json');
@@ -156,12 +186,64 @@
       }
     }
 
-    window.onload = loadPrediction;
+    /* --- Fetch and display the historical data & pie chart --- */
+    async function loadHistory() {
+      try {
+        const response = await fetch('data/prediction_history.json');
+        const history = await response.json();
+
+        // If there's no history yet, just show a note
+        if (!Array.isArray(history) || history.length === 0) {
+          document.getElementById('history-section').innerHTML = `
+            <h2>Historical Penguin Predictions</h2>
+            <p>No historical data available yet. Stay tuned!</p>
+          `;
+          return;
+        }
+
+        // Find earliest date in the history
+        const earliestTimestamp = history
+          .map(h => new Date(h.timestamp))
+          .reduce((a, b) => a < b ? a : b); // min date
+        const earliestDateStr = earliestTimestamp.toLocaleDateString();
+
+        // Count how many predictions we have so far
+        const totalCount = history.length;
+
+        // Display the historical overview
+        document.getElementById('history-section').innerHTML = `
+          <h2>Historical Penguin Predictions</h2>
+          <p>We started tracking penguin appearances in New York on <strong>${earliestDateStr}</strong>. 
+          Since then, we have recorded <strong>${totalCount}</strong> penguin prediction(s). 
+          The chart below shows the distribution of the predicted species so far. As more penguins are spotted, these numbers may change.</p>
+          <img src="data/species_distribution.png" alt="Penguin Species Distribution"/>
+          <p>It's fascinating to see how many Gentoos, Adélies, and Chinstraps have turned up in unexpected places across the city. 
+          Rumors are swirling that an Antarctic tourism operator may be sneaking these flightless travelers into the Big Apple—possibly 
+          to enjoy our unique culinary scene or vibrant nightlife. We’ll keep updating this chart and bring you the latest (and cutest) 
+          penguin news as it unfolds!</p>
+        `;
+      } catch (error) {
+        document.getElementById('history-section').innerHTML = `
+          <h2>Historical Penguin Predictions</h2>
+          <p class='loading'>Failed to load historical data.</p>
+        `;
+      }
+    }
+
+    /* --- On page load, fetch both the latest prediction and the historical data --- */
+    window.onload = function() {
+      loadPrediction();
+      loadHistory();
+    };
   </script>
 </head>
 <body>
   <div class="container">
+    <!-- Latest single prediction/article goes here -->
     <div id="prediction" class="loading">Loading article...</div>
+
+    <!-- Historical data and pie chart go here -->
+    <div id="history-section" class="history-section"></div>
   </div>
 </body>
 </html>
