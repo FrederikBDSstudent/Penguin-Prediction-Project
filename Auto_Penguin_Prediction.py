@@ -3,6 +3,10 @@ import json
 import joblib
 import requests
 import datetime
+import matplotlib
+
+# For headless environments (like GitHub Actions), use a non-interactive backend
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # Ensure the "data" folder exists
@@ -28,7 +32,7 @@ features = [[
 scaled_features = scaler.transform(features)
 
 # 4) Apply the same feature selection used during training
-#    (Here we assume the first 3 features were kept by RFE)
+#    (Assuming the first 3 features were kept by RFE)
 selected_features = scaled_features[:, :3]
 
 # 5) Predict species using the wrapper model
@@ -51,10 +55,13 @@ with open("data/prediction_result.json", "w") as f:
 # 7) Update statistics in prediction_historical_stats.json
 STATS_FILE = "data/prediction_historical_stats.json"
 
-# Load existing stats if available
+# Load existing stats if available; handle empty/invalid JSON gracefully
 if os.path.exists(STATS_FILE):
     with open(STATS_FILE, "r") as f:
-        stats = json.load(f)
+        try:
+            stats = json.load(f)
+        except json.decoder.JSONDecodeError:
+            stats = {}
 else:
     stats = {}
 
