@@ -60,7 +60,7 @@
       text-align: center;
     }
 
-    /* New section for historical data */
+    /* Section for historical data */
     .history-section {
       margin-top: 60px;
       border-top: 1px solid #ccc;
@@ -86,10 +86,47 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+    .history-section ul {
+      margin: 0 0 20px 20px;
+      padding: 0;
+      list-style-type: disc;
+    }
+
+    /* Extra content section */
+    .extra-section {
+      margin-top: 60px;
+      border-top: 1px solid #ccc;
+      padding-top: 40px;
+    }
+    .extra-section h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      text-align: center;
+      text-transform: uppercase;
+      border-bottom: 1px solid #000;
+      padding-bottom: 10px;
+    }
+    .extra-section p {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-align: justify;
+    }
+    .local-reaction {
+      font-style: italic;
+      font-size: 17px;
+      margin: 20px 0;
+      border-left: 3px solid #999;
+      padding-left: 15px;
+      color: #555;
+    }
+    .hotline {
+      font-weight: bold;
+      color: #333;
+    }
   </style>
 
   <script>
-    /* --- Existing code to generate a whimsical narrative --- */
+    /* --- Generate a whimsical narrative for the daily article --- */
     function getDiscoveryNarrative() {
       const methods = [
         "was spotted casually strolling through",
@@ -117,7 +154,13 @@
         "Fifth Avenue"
       ];
 
-      const times = ["early this morning", "just before noon", "late in the afternoon", "as the sun set", "under the bright city lights"];
+      const times = [
+        "early this morning",
+        "just before noon",
+        "late in the afternoon",
+        "as the sun set",
+        "under the bright city lights"
+      ];
       const weather = ["chilly", "rainy", "unexpectedly warm", "foggy", "breezy"];
 
       const daySeed = new Date().getDate();
@@ -153,6 +196,30 @@
         "Chinstrap": "Chinstrap penguins are vocal and expressive, named for the thin black line under their beak that looks like a helmet strap. Found on rugged islands in the Southern Ocean, they live in large colonies and are constantly chatting, squawking, and waddling around with attitude. Fierce and feathery, they’re born entertainers."
       };
       return descriptions[species] || "This penguin is truly one of a kind — mysterious, elegant, and unlike any we’ve seen before. Its species remains rare in these urban adventures.";
+    }
+
+    /* --- Random fun fact about penguins --- */
+    function getRandomFunFact() {
+      const funFacts = [
+        "Penguins can drink saltwater because a special gland filters excess salt from their bloodstream.",
+        "A group of penguins on land is called a waddle, while a group of penguins in the water is called a raft.",
+        "Some penguin species can leap up to six feet out of the water onto ice or land.",
+        "Penguins have knees hidden under their feathers — their legs are longer than they look!",
+        "The fastest penguin is the Gentoo, which can swim up to 36 km/h (22 mph)."
+      ];
+      return funFacts[Math.floor(Math.random() * funFacts.length)];
+    }
+
+    /* --- Random local reaction from a fictional NYC resident --- */
+    function getLocalReaction() {
+      const reactions = [
+        "“I thought I was hallucinating until it honked at me!”",
+        "“First I saw a rat the size of a cat, now a penguin in Times Square? Only in New York!”",
+        "“It waddled right up to me like it wanted a bagel. So I gave it one.”",
+        "“If this penguin can handle the F train, it’s definitely a true New Yorker.”",
+        "“It looked so dapper, I almost asked if it had tickets to the Broadway show!”"
+      ];
+      return reactions[Math.floor(Math.random() * reactions.length)];
     }
 
     /* --- Fetch and display the latest prediction article --- */
@@ -207,16 +274,35 @@
           .reduce((a, b) => a < b ? a : b); // min date
         const earliestDateStr = earliestTimestamp.toLocaleDateString();
 
-        // Count how many predictions we have so far
+        // Count how many predictions total
         const totalCount = history.length;
+
+        // Count how many of each species
+        const speciesCounts = {};
+        history.forEach(item => {
+          const sp = item.predicted_species;
+          speciesCounts[sp] = (speciesCounts[sp] || 0) + 1;
+        });
+
+        // Build an HTML snippet listing species and their counts
+        let speciesCountsHTML = `<p>So far, we have encountered the following species in total:</p><ul>`;
+        for (const [sp, count] of Object.entries(speciesCounts)) {
+          speciesCountsHTML += `<li><strong>${sp}:</strong> ${count}</li>`;
+        }
+        speciesCountsHTML += `</ul>`;
 
         // Display the historical overview
         document.getElementById('history-section').innerHTML = `
           <h2>Historical Penguin Predictions</h2>
-          <p>We started tracking penguin appearances in New York on ${earliestDateStr}. 
-          Since then, we have recorded ${totalCount} penguins. 
-          The chart below shows the distribution of the predicted species so far. As more penguins are spotted, these numbers may change.</p>
+          <p>We started tracking penguin appearances in New York on <strong>${earliestDateStr}</strong>. 
+          Since then, we have recorded <strong>${totalCount}</strong> penguins. 
+          The chart below shows the distribution of the predicted species so far. 
+          As more penguins are spotted, these numbers may change.</p>
+
           <img src="data/species_distribution.png" alt="Penguin Species Distribution"/>
+
+          ${speciesCountsHTML}
+
           <p>It's fascinating to see how many Gentoos, Adélies, and Chinstraps have turned up in unexpected places across the city. 
           Rumors are swirling that an Antarctic tourism operator may be sneaking these flightless travelers into the Big Apple—possibly 
           to enjoy our unique culinary scene or vibrant nightlife. We’ll keep updating this chart and bring you the latest (and cutest) 
@@ -230,10 +316,26 @@
       }
     }
 
-    /* --- On page load, fetch both the latest prediction and the historical data --- */
+    /* --- Display extra content: Fun Fact & Local Reaction --- */
+    function loadExtraFeatures() {
+      const funFact = getRandomFunFact();
+      const localQuote = getLocalReaction();
+
+      document.getElementById('extra-section').innerHTML = `
+        <h2>Penguin Fun Fact & Local Reaction</h2>
+        <p><strong>Fun Fact:</strong> ${funFact}</p>
+        <div class="local-reaction">
+          <strong>Local Reaction:</strong> ${localQuote}
+        </div>
+        <p>If you happen to spot any wandering penguins, please call our <span class="hotline">Penguin Hotline at 1-800-PENGUIN</span> or email <em>sightings@penguindaily.com</em>. Your tip could be the next big story!</p>
+      `;
+    }
+
+    /* --- On page load, fetch both the latest prediction and the historical data, plus extras --- */
     window.onload = function() {
       loadPrediction();
       loadHistory();
+      loadExtraFeatures();
     };
   </script>
 </head>
@@ -244,6 +346,9 @@
 
     <!-- Historical data and pie chart go here -->
     <div id="history-section" class="history-section"></div>
+
+    <!-- Extra content: fun fact, local reaction, hotline -->
+    <div id="extra-section" class="extra-section"></div>
   </div>
 </body>
 </html>
