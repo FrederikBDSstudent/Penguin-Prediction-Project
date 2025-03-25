@@ -13,26 +13,32 @@ url = "http://130.225.39.127:8000/new_penguin/"
 response = requests.get(url)
 data = response.json()
 
-# Use only the 3 features that the wrapper model expects:
+# Extract all 4 features
 features = [[
     data["bill_length_mm"],
     data["bill_depth_mm"],
-    data["flipper_length_mm"]
+    data["flipper_length_mm"],
+    data["body_mass_g"]
 ]]
 
-# Scale the features
+# Scale all 4 features (scaler was fitted on 4 features)
 scaled_features = scaler.transform(features)
 
-# Predict species and decode the result
-species_encoded = clf.predict(scaled_features)[0]
+# Apply the same feature selection used during training (select only 3 features)
+# Here we assume RFE kept the first 3 features; adjust the slice if a different ordering was used.
+selected_features = scaled_features[:, :3]
+
+# Predict species using the wrapper model (which expects 3 features)
+species_encoded = clf.predict(selected_features)[0]
 species = label_encoder.inverse_transform([species_encoded])[0]
 
-# Build the prediction result (note that body_mass_g is omitted because it's not used by the model)
+# Save the prediction result as JSON
 prediction_result = {
     "timestamp": datetime.datetime.utcnow().isoformat(),
     "bill_length_mm": data["bill_length_mm"],
     "bill_depth_mm": data["bill_depth_mm"],
     "flipper_length_mm": data["flipper_length_mm"],
+    "body_mass_g": data["body_mass_g"],
     "predicted_species": species
 }
 
