@@ -3,8 +3,8 @@ import joblib
 import requests
 import datetime
 
-# Load the model trained on all 4 features, label encoder, and scaler
-clf = joblib.load("models/penguin_classifier_all_features.pkl")
+# Load the wrapper model, label encoder, and scaler
+clf = joblib.load("models/wrapper_model.pkl")
 label_encoder = joblib.load("models/label_encoder.pkl")
 scaler = joblib.load("models/scaler.pkl")
 
@@ -13,12 +13,11 @@ url = "http://130.225.39.127:8000/new_penguin/"
 response = requests.get(url)
 data = response.json()
 
-# Extract all 4 features
+# Use only the 3 features that the wrapper model expects:
 features = [[
     data["bill_length_mm"],
     data["bill_depth_mm"],
-    data["flipper_length_mm"],
-    data["body_mass_g"]
+    data["flipper_length_mm"]
 ]]
 
 # Scale the features
@@ -28,13 +27,12 @@ scaled_features = scaler.transform(features)
 species_encoded = clf.predict(scaled_features)[0]
 species = label_encoder.inverse_transform([species_encoded])[0]
 
-# Save the prediction result as JSON
+# Build the prediction result (note that body_mass_g is omitted because it's not used by the model)
 prediction_result = {
     "timestamp": datetime.datetime.utcnow().isoformat(),
     "bill_length_mm": data["bill_length_mm"],
     "bill_depth_mm": data["bill_depth_mm"],
     "flipper_length_mm": data["flipper_length_mm"],
-    "body_mass_g": data["body_mass_g"],
     "predicted_species": species
 }
 
