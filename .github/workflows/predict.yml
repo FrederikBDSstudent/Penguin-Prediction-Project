@@ -13,7 +13,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout Repository
+      - name: Check out Repository
         uses: actions/checkout@v4
 
       - name: Verify Files Exist (Debugging Step)
@@ -30,12 +30,13 @@ jobs:
       - name: Run Prediction Script
         run: python Auto_Penguin_Prediction.py
 
-      - name: Commit and Push JSON Prediction
+      - name: Commit and Push Updated Data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add data/prediction_result.json
-          git commit -m "Updated prediction data" || echo "No changes to commit"
+          # Add the three files that get updated by the script
+          git add data/prediction_result.json data/prediction_historical_stats.json data/species_distribution.png
+          git commit -m "Automated update of prediction data" || echo "No changes to commit"
           git push origin main
