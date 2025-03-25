@@ -48,7 +48,7 @@ prediction_result = {
 with open("data/prediction_result.json", "w") as f:
     json.dump(prediction_result, f, indent=4)
 
-# 7) Update statistics in prediction_stats.json
+# 7) Update statistics in prediction_historical_stats.json
 STATS_FILE = "data/prediction_historical_stats.json"
 
 # Load existing stats if available
