@@ -22,5 +22,13 @@
         "flipper_length_mm": 185.3148608425986,
         "body_mass_g": 4554.993173705314,
         "predicted_species": "Chinstrap"
+    },
+    {
+        "timestamp": "2025-03-28T05:43:04.461700",
+        "bill_length_mm": 39.35703563483552,
+        "bill_depth_mm": 16.811409132064792,
+        "flipper_length_mm": 220.61808061046793,
+        "body_mass_g": 3819.7255422628805,
+        "predicted_species": "Adelie"
     }
 ]
