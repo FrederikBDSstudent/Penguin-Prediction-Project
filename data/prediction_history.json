@@ -86,5 +86,13 @@
         "flipper_length_mm": 197.33454157533185,
         "body_mass_g": 4712.710436355916,
         "predicted_species": "Adelie"
+    },
+    {
+        "timestamp": "2025-04-05T05:40:45.559558",
+        "bill_length_mm": 42.27533941593972,
+        "bill_depth_mm": 17.18464932652063,
+        "flipper_length_mm": 192.21286291489838,
+        "body_mass_g": 6029.452271307033,
+        "predicted_species": "Adelie"
     }
 ]
