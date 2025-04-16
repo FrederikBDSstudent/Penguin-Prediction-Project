@@ -1,46 +1,46 @@
-name: Fetch and Predict
+#name: Fetch and Predict
 
-on:
-  schedule:
-    - cron: '30 5 * * *'  # Runs at 07:30 Danish time (during summer)
-  workflow_dispatch:
+#on:
+  #schedule:
+    #- cron: '30 5 * * *'  # Runs at 07:30 Danish time (during summer)
+  #workflow_dispatch:
 
-jobs:
-  fetch_and_predict:
-    runs-on: ubuntu-latest
+#jobs:
+  #fetch_and_predict:
+    #runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
+    #permissions:
+      #contents: write
 
-    steps:
-      - name: Check out Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Ensures full history so commits can be pushed correctly
+    #steps:
+      #- name: Check out Repository
+        #uses: actions/checkout@v4
+        #with:
+          #fetch-depth: 0
 
-      - name: Verify Files Exist (Debugging Step)
-        run: ls -l
+      #- name: Verify Files Exist (Debugging Step)
+        #run: ls -l
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+      #- name: Set up Python
+        #uses: actions/setup-python@v4
+        #with:
+          #python-version: '3.9'
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
+      #- name: Install Dependencies
+        #run: pip install -r requirements.txt
 
-      - name: Run Prediction Script
-        run: python Auto_Penguin_Prediction.py
+      #- name: Run Prediction Script
+        #run: python Auto_Penguin_Prediction.py
 
-      - name: Commit and Push Updated Data
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          # Stage updated files including the prediction history file
-          git add data/prediction_result.json data/prediction_historical_stats.json data/species_distribution.png data/prediction_history.json
-          # Commit if there are any changes
-          git diff-index --quiet HEAD || git commit -m "Automated update of prediction data"
-          # Push changes to the main branch
-          git push origin HEAD:main
+      #- name: Commit and Push Updated Data
+        #env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #run: |
+          #git config --global user.name "github-actions"
+          #git config --global user.email "actions@github.com"
+          ## Stage updated files including the prediction history file
+          #git add data/prediction_result.json data/prediction_historical_stats.json data/species_distribution.png data/prediction_history.json
+          ## Commit if there are any changes
+          #git diff-index --quiet HEAD || git commit -m "Automated update of prediction data"
+          ## Push changes to the main branch
+          #git push origin HEAD:main
